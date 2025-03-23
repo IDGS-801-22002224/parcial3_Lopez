@@ -1,0 +1,40 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Pedidos de Pizza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <!-- Mensajes Flash -->
+    {% from "_macros.html" import flash_messages %}
+    {{ flash_messages() }}
+
+    <!-- Formulario de Login -->
+    <div class="flex items-center justify-center min-h-screen">
+        <form class="max-w-sm mx-auto" method="POST" action="{{ url_for('login') }}" novalidate>
+            {{ form.csrf_token }}
+            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Log In a Pedidos de Pizza</h2>
+            
+            {% from "_macros.html" import camposNuevos, render_checkbox %}
+            {{ camposNuevos(form.username) }}
+            {{ camposNuevos(form.password) }}
+            {{ render_checkbox(form.remember) }}
+            
+            <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                {{ form.submit.label.text }}
+            </button>
+
+            <!-- Enlace para registrarse -->
+            <p class="mt-4 text-center">
+                <a href="{{ url_for('register') }}" class="text-sm text-blue-700 hover:underline dark:text-blue-500">Regístrate</a>
+            </p>
+        </form>
+    </div>
+
+    <!-- Scripts de Flowbite -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+</body>
+</html>

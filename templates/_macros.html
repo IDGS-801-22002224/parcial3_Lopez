@@ -1,0 +1,63 @@
+<!-- templates/_macros.html -->
+{% macro datos(name, placeholder, type="text") %}
+    <div>
+        <label for="{{ name }}">{{ name }}:</label>
+        <input name="{{ name }}" type="{{ type }}" placeholder="{{ placeholder }}">
+    </div>
+{% endmacro %}
+
+{% macro camposNuevos(field) %}
+    <div class="mb-5">
+        <label for="{{ field.id }}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ field.label.text }}</label>
+        {{ field(class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500") | safe }}
+        {% if field.errors %}
+            <ul class="mt-2">
+                {% for error in field.errors %}
+                    <li class="text-sm text-red-600">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro render_checkbox(field) %}
+    <div class="flex items-start mb-5">
+        <div class="flex items-center h-5">
+            {{ field(class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800") | safe }}
+        </div>
+        <label for="{{ field.id }}" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{ field.label.text }}</label>
+    </div>
+{% endmacro %}
+
+{% macro render_table(data) %}
+    <table border="1">
+        <thead>
+            <tr>
+                {% for header in data.headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data.rows %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
+
+{% macro flash_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="container mx-auto mt-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 border-green-400 text-green-700{% else %}bg-red-100 border-red-400 text-red-700{% endif %} border">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+{% endmacro %}

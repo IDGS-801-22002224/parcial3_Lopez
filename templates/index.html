@@ -1,0 +1,231 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedidos de Pizza</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            background-color: #D3E4F5;
+        }
+        .form-container, .table-container {
+            border: 2px dashed #0000FF;
+            padding: 4px;
+            margin-bottom: 4px;
+            background-color: #0f97c36b;
+            border-radius: 5px;
+        }
+        .table-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .table-wrapper {
+            width: 55%;
+        }
+        .sales-container {
+            border: 2px dashed #0000FF;
+            padding: 4px;
+            background-color: #D3D3D3;
+            border-radius: 5px;
+            width: 40%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 2px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .flash-success {
+            color: green;
+            margin: 5px 0;
+        }
+        .flash-error {
+            color: red;
+            margin: 5px 0;
+        }
+        .flash-info {
+            color: blue;
+            margin: 5px 0;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+        .form-row div {
+            margin-right: 2px;
+        }
+        .form-row input[type="text"], .form-row input[type="number"] {
+            width: 150px;
+            padding: 2px;
+        }
+        .form-row input[type="radio"], .form-row input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .form-row .ingredients {
+            display: flex;
+            flex-direction: column;
+            width: 150px;
+        }
+        .form-row .submit-btn {
+            align-self: flex-end;
+        }
+        button, .button {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            margin-right: 1px;
+            text-decoration: none;
+            color: black;
+            display: inline-block;
+            font-size: 14px;
+        }
+        button:hover, .button:hover {
+            background-color: #ddd;
+        }
+        .action-buttons {
+            margin-bottom: 2px;
+        }
+        .sales-container p {
+            margin: 1px 0;
+            font-size: 14px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        h3 {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+        .logout-link {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-link">
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}" class="button">Logout ({{ current_user.username }})</a>
+        {% endif %}
+    </div>
+
+    <h1>Pedidos de Pizza</h1>
+
+    <!-- Mostrar mensajes flash -->
+    {% from "_macros.html" import flash_messages %}
+    {{ flash_messages() }}
+
+    <!-- Formulario de pedido -->
+    <div class="form-container">
+        <form method="POST" action="/">
+            {{ form.csrf_token }}
+            {{ form.tipo_formulario() }}
+            <div class="form-row">
+                <div>{{ form.nombre.label }} {{ form.nombre }}</div>
+                <div>{{ form.direccion.label }} {{ form.direccion }}</div>
+                <div>{{ form.telefono.label }} {{ form.telefono }}</div>
+            </div>
+            <div class="form-row">
+                <div>
+                    {{ form.tamano.label }}<br>
+                    {{ form.tamano }}
+                </div>
+                <div class="ingredients">
+                    {{ form.jamon.label }} {{ form.jamon }}<br>
+                    {{ form.pina.label }} {{ form.pina }}<br>
+                    {{ form.champinones.label }} {{ form.champinones }}
+                </div>
+                <div>{{ form.num_pizzas.label }} {{ form.num_pizzas }}</div>
+                <div class="submit-btn">{{ form.submit() }}</div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Contenedor para tabla y ventas -->
+    <div class="table-container">
+        <!-- Tabla de pedidos a la izquierda -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tamaño</th>
+                        <th>Ingredientes</th>
+                        <th>Num. Pizzas</th>
+                        <th>SubTotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if pedidos_mostrados %}
+                        {% for pedido in pedidos_mostrados %}
+                        <tr>
+                            <td>{{ pedido.tamano }}</td>
+                            <td>{{ pedido.ingredientes }}</td>
+                            <td>{{ pedido.num_pizzas }}</td>
+                            <td>${{ pedido.subtotal }}</td>
+                            <td>
+                                <a href="{{ url_for('quitar', pedido_id=pedido.id) }}" class="button">Quitar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5">No hay pedidos para mostrar.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <div class="action-buttons">
+                <form method="POST" action="{{ url_for('terminar') }}">
+                    {{ form.csrf_token }}
+                    <button type="submit" class="button">Terminar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sección de ventas a la derecha -->
+        <div class="sales-container">
+            <h3>Ventas del mes</h3>
+            {% if mostrar_ventas %}
+                {% for cliente, total in ventas_por_cliente.items() %}
+                    <p>{{ cliente }} total ${{ total }}</p>
+                {% endfor %}
+                <p>Ventas totales del mes: ${{ ventas_totales }}</p>
+            {% else %}
+                {% if ventas_por_cliente %}
+                    {% for cliente, total in ventas_por_cliente.items() %}
+                        <p>{{ cliente }} total ${{ total }}</p>
+                    {% endfor %}
+                {% else %}
+                    <!-- Dejar el recuadro gris vacío inicialmente -->
+                {% endif %}
+            {% endif %}
+            <form method="POST" action="/">
+                {{ busqueda_form.csrf_token }}
+                {{ busqueda_form.tipo_formulario() }}
+                <div class="form-row">
+                    <div>{{ busqueda_form.periodo.label }} {{ busqueda_form.periodo }}</div>
+                    <div>{{ busqueda_form.fecha.label }} {{ busqueda_form.fecha }}</div>
+                    <div>{{ busqueda_form.submit() }}</div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
